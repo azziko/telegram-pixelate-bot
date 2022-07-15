@@ -10,10 +10,10 @@ import (
 )
 
 var TOKEN = os.Getenv("TOKEN")
+var PORT = os.Getenv("PORT")
 
 const (
-	URL  = "https://api.telegram.org/bot"
-	PORT = "80"
+	URL = "https://api.telegram.org/bot"
 )
 
 func update(w http.ResponseWriter, r *http.Request) {
@@ -51,7 +51,7 @@ func main() {
 	http.HandleFunc("/", update)
 
 	fmt.Println("Listenning on port", PORT, ".")
-	if err := http.ListenAndServe("/", nil); err != nil {
+	if err := http.ListenAndServe(":"+PORT, nil); err != nil {
 		log.Fatal(err)
 	}
 }
