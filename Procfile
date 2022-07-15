@@ -1,1 +1,0 @@
-web: bin/telegram-pixelate-bot
