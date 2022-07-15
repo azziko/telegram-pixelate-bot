@@ -1,1 +1,1 @@
-web: bin/telegram-bot-pixelate
+web: bin/telegram-pixelate-bot
