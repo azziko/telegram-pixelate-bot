@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"pixelate/models"
+	"pixelate/app/client/telegram/models"
 )
 
 var TOKEN = os.Getenv("TOKEN")
@@ -20,53 +20,23 @@ func update(w http.ResponseWriter, r *http.Request) {
 
 	message := &models.Update{}
 
-	chatID := 0
+	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
+		fmt.Println(err)
+	}
+
 	msgText := ""
-
-	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
-		fmt.Println(err)
-	}
-
-	if message.Message.Chat.ID != 0 {
-		fmt.Println(message.Message.Chat.ID, message.Message.Text)
-		chatID = message.Message.Chat.ID
-		msgText = message.Message.Text
-	}
-
-	respMsg := fmt.Sprintf("%s%s/sendMessage?chat_id=%d&text=Received: %s", URL, TOKEN, chatID, msgText)
-
-	if _, err := http.Get(respMsg); err != nil {
-		fmt.Println(err)
-	}
-}
-
-func start(w http.ResponseWriter, r *http.Request) {
-	message := &models.Update{}
-
-	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
-		fmt.Println(err)
-	}
-
-	msgText := `Hi there! Send a picture to begin`
 	chatID := message.Message.Chat.ID
 
-	respMsg := fmt.Sprintf("%s%s/sendMessage?chat_id=%d&text=%s", URL, TOKEN, chatID, msgText)
+	switch {
+	case len(message.Message.Photo) > 0:
+		msgText = "Photo received"
 
-	if _, err := http.Get(respMsg); err != nil {
-		fmt.Println(err)
+	case message.Message.Document.Size > 0:
+		msgText = "Please send me the picture as a 'Photo', not as a 'File'."
+
+	default:
+		msgText = "Please send me a picture to begin"
 	}
-}
-
-func help(w http.ResponseWriter, r *http.Request) {
-	message := &models.Update{}
-
-	if err := json.NewDecoder(r.Body).Decode(&message); err != nil {
-		fmt.Println(err)
-	}
-
-	msgText := `Simply send me a picture to pixelate and wait until it's done. 
-	p.s It might take some time to process a picture. Thanks for your patience`
-	chatID := message.Message.Chat.ID
 
 	respMsg := fmt.Sprintf("%s%s/sendMessage?chat_id=%d&text=%s", URL, TOKEN, chatID, msgText)
 
@@ -78,10 +48,8 @@ func help(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	http.HandleFunc("/", update)
-	http.HandleFunc("/start", start)
-	http.HandleFunc("/help", help)
 
-	fmt.Println("Listenning on port", PORT, ".")
+	fmt.Println("Listenning on port", PORT)
 	if err := http.ListenAndServe(":"+PORT, nil); err != nil {
 		log.Fatal(err)
 	}
