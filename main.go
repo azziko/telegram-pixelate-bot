@@ -1,57 +1,35 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"log"
-	"net/http"
 	"os"
-	"pixelate/models"
+	"pixelate/app"
+	"pixelate/app/client/telegram"
+	"pixelate/app/handler"
+	"pixelate/app/storage/img"
 )
-
-var TOKEN = os.Getenv("TOKEN")
 
 const (
-	URL  = "https://api.telegram.org/bot"
-	PORT = "80"
+	host           = "api.telegram.org"
+	storageDirPath = "./img/"
 )
-
-func update(w http.ResponseWriter, r *http.Request) {
-
-	message := &models.ReceiveMessage{}
-
-	chatID := 0
-	msgText := ""
-
-	err := json.NewDecoder(r.Body).Decode(&message)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	if message.Message.Chat.ID != 0 {
-		fmt.Println(message.Message.Chat.ID, message.Message.Text)
-		chatID = message.Message.Chat.ID
-		msgText = message.Message.Text
-	} else {
-		fmt.Println(message.ChannelPost.Chat.ID, message.ChannelPost.Text)
-		chatID = message.ChannelPost.Chat.ID
-		msgText = message.ChannelPost.Text
-	}
-
-	respMsg := fmt.Sprintf("%s%s/sendMessage?chat_id=%d&text=Received: %s", URL, TOKEN, chatID, msgText)
-
-	_, err = http.Get(respMsg)
-	if err != nil {
-		fmt.Println(err)
-	}
-}
 
 func main() {
 
-	http.HandleFunc("/", update)
+	var token = os.Getenv("TOKEN")
+	var port = os.Getenv("PORT")
 
-	fmt.Println("Listenning on port", PORT, ".")
-	if err := http.ListenAndServe("/", nil); err != nil {
-		log.Fatal(err)
+	tgClient := telegram.NewClient(host, token)
+	storage := img.NewStorage(storageDirPath)
+	fmt.Println("Storage initiated successfuly!")
+
+	if err := storage.Init(); err != nil {
+		panic("Could not initiate storage: " + err.Error())
 	}
+
+	handler := handler.NewUpdateHandler(tgClient, storage)
+
+	app := app.NewApp(port, handler)
+
+	app.Start()
 }
