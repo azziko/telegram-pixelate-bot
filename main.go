@@ -21,15 +21,14 @@ func main() {
 
 	tgClient := telegram.NewClient(host, token)
 	storage := img.NewStorage(storageDirPath)
-	fmt.Println("Storage initiated successfuly!")
 
 	if err := storage.Init(); err != nil {
 		panic("Could not initiate storage: " + err.Error())
 	}
+	fmt.Println("Storage initiated successfuly!")
 
 	handler := handler.NewUpdateHandler(tgClient, storage)
 
 	app := app.NewApp(port, handler)
-
 	app.Start()
 }
