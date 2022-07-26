@@ -17,4 +17,4 @@ WORKDIR /
 
 COPY --from=builder /app /app
 
-CMD "pixelate"
+CMD [ "/app/pixelate" ]

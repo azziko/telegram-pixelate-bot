@@ -3,4 +3,4 @@ build:
     web: Dockerfile
 
 run: 
-  web: ./pixelate-bot
+  web: /app/pixelate
