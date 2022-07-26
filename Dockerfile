@@ -1,17 +1,20 @@
 FROM golang:1.18-alpine3.15 AS builder
 
-WORKDIR /pixelate-app
+WORKDIR /app
 
-COPY . /pixelate-app
+COPY . /app
 
 # configure go mod 
 RUN go mod download
 
 # build
-RUN go build -o /pixelate-bot
+RUN go build .
 
 #multistage
 FROM alpine:3.15
-COPY --from=builder /pixelate-app /pixelate-app
 
-CMD ["./pixelate-bot"]
+WORKDIR /
+
+COPY --from=builder /app /app
+
+CMD "pixelate"
