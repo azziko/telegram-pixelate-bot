@@ -1,4 +1,6 @@
+Dockerfile
 .gitignore
+.git
 *.md
 *.txt
 *.exe

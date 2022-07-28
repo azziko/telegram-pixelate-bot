@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"pixelate/app"
 	"pixelate/app/client/telegram"
@@ -29,6 +30,10 @@ func main() {
 
 	handler := handler.NewUpdateHandler(tgClient, storage)
 
-	app := app.NewApp(port, handler)
-	app.Start()
+	server := &http.Server{
+		Addr: ":" + port,
+	}
+
+	app := app.NewApp(server, handler)
+	app.Run()
 }

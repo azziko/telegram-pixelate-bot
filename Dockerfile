@@ -2,7 +2,7 @@ FROM golang:1.18-alpine3.15 AS builder
 
 WORKDIR /app
 
-COPY . /app
+COPY . .
 
 # configure go mod 
 RUN go mod download
@@ -12,8 +12,6 @@ RUN go build .
 
 #multistage
 FROM alpine:3.15
-
-WORKDIR /
 
 COPY --from=builder /app /app
 
